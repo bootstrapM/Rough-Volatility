@@ -47,7 +47,7 @@ This ensures the variance process remains strictly positive.
 
 ### Single Path ACF Analysis
 
-![Volatility Clustering ACF](/figures/volatility_clustering_single_instance_acf.png)
+![Volatility Clustering ACF](figures/volatility_clustering_single_instance_acf.png)
 
 The figure above shows the autocorrelation function (ACF) analysis of returns and volatility for a single path. The top panel displays the ACF of absolute returns, while the bottom panel shows the ACF of squared returns. Key observations:
 
@@ -66,7 +66,7 @@ The figure above shows the autocorrelation function (ACF) analysis of returns an
 
 ### Path-Averaged ACF Analysis
 
-![Volatility Clustering ACF Averaged](/figures/volatility_clustering_acf.png)
+![Volatility Clustering ACF Averaged](figures/volatility_clustering_acf.png)
 
 The figure above shows the ACF analysis averaged across all simulated paths. This provides a more robust view of the volatility clustering patterns:
 
@@ -86,8 +86,8 @@ The figure above shows the ACF analysis averaged across all simulated paths. Thi
 
 ### Volatility Decay Analysis
 
-![Volatility Decay ACF](/figures/volatility_decay_acf.png)
-![Volatility Decay Log ACF](/figures/volatility_decay_log_acf.png)
+![Volatility Decay ACF](figures/volatility_decay_acf.png)
+![Volatility Decay Log ACF](figures/volatility_decay_log_acf.png)
 
 The two figures above show the decay patterns in volatility:
 
