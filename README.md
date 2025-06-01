@@ -2,7 +2,17 @@
 
 ## Some Background
 
-In 1900, Bachelier introduced the first mathematical model of prices, the Brownian motion. For several years the only modification to Bachelier model was to consider log-prices (instead of prices themselves) that are described by Brownian motion. While this modification prevents the prices from becoming negative, for a long time none of the drawbacks of Bachelier model were addressed (a major drawback being failing to capture features like **fat tails**, **volatility clustering**, and **skewness** in returns). Then in 1973 Black and Scholes published their famous paper where it was shown that perfect delta-hedging was possible (i.e. it is possible to construct a portfolio where the risk from small movements in the price of the underlying asset can be completely eliminated). However the condition under which this is possible is
+In 1900, Bachelier introduced the first mathematical model of prices, the Brownian motion. For several years the only modification to Bachelier model was to consider log-prices (instead of prices themselves) that are described by Brownian motion. While this modification prevents the prices from becoming negative, for a long time none of the drawbacks of Bachelier model were addressed. The major drawbacks being failing to capture now widely accepted *stylized facts* about financial time series (at daily frequency granularity)
+
+ - fat tails in return distributions (unconditional return distribution tend to have fatter tails than conditional return distribution)
+ - absence of autocorrelation in returns (at time scales above which the market microstructure becomes important)
+ - volatility clustering (strong positive autocorrelation in the absolute or squared return series)
+ - aggregational normality (at longer time scales say, weekly or monthly
+returns, as opposed to daily or intraday, the distribution of
+log-returns becomes closer to a Gaussian distribution.)
+ - skewness in returns (Negative skewness, commonly observed in stock returns, indicates a longer or fatter left tail, implying that large downward movements are more prevalent or severe than large upward movements.)
+ 
+ Then in 1973 Black and Scholes published their famous paper where it was shown that perfect delta-hedging was possible (i.e. it is possible to construct a portfolio where the risk from small movements in the price of the underlying asset can be completely eliminated). However the condition under which this is possible is
 
 - Continuous trading (the hedge is adjusted instantly and continuously)
 - No Transaction cost 
