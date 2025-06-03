@@ -171,12 +171,12 @@ The price of the put option can be obtained from the put-call parity given by $P
 In the monte carlo simulation we use the descretization procedure with the full truncation scheme that sets any negative value of the variance process to zero. In this case we simply read-off the end price of the $S_t$ process then setting
 
 $$
-C = e^{-rt}\mathbb{E}[\left[(S_0-K)^+ \right]]~
+C = e^{-rt}\mathbb{E}\left[(S_0-K)^+ \right]~
 $$
 
 The expected value is computed by an average over all the paths. 
 
-In the following plot we compare the answer from the two methods for the given model and simulation parameters. The risk free rate used was $r=0.05$ and time to maturity $T=1$ yr. Pricing with Heston Characteristic Function Method gives
+In the following plot we compare the answer from the two methods for the given model and simulation parameters. The risk free rate used was $r=0.05$ and time to maturity $T=5$ yr. Pricing using the Heston characteristic function gives
 
 ```
 Call Price: 36.7347
