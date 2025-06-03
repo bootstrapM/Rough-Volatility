@@ -152,22 +152,26 @@ $$
 $$
 
 In terms of the characteristic function, the price of the European Call option is given by
+
 $$
-\boxed{C = S_0 Q_1 - e^{-rt} K Q_2}
+C = S_0 Q_1 - e^{-rt} K Q_2
 $$
+
 where $P_1$ and $P_2$ are given by
+
 $$
 Q_1 = \frac{1}{2}+\frac{1}{\pi}\int_0^\infty du ~\Re\left(\frac{e^{-i u \log \left(\frac{S_0}{K}\right)}}{iu}\frac{\phi (u-i)}{\phi (-i)}\right)~,\\[5pt]
-
 Q_2 = \frac{1}{2}+\frac{1}{\pi}\int_0^\infty du ~\Re\left(\frac{e^{-i u \log \left(\frac{S_0}{K}\right)}}{iu}\phi (u)\right)~.
 $$
 
 The price of the put option can be obtained from the put-call parity given by $P = C - S_0 + K  \exp(-r  T)$. 
 
 In the monte carlo simulation we use the descretization procedure with the full truncation scheme that sets any negative value of the variance process to zero. In this case we simply read-off the end price of the $S_t$ process then setting
+
 $$
-C = e^{-rt}\mathrm{E}[\left[(S_0-K)^+ \right]]~
+C = e^{-rt}\mathbb{E}[\left[(S_0-K)^+ \right]]~
 $$
+
 The expected value is computed by an average over all the paths. 
 
 In the following plot we compare the answer from the two methods for the given model and simulation parameters. The risk free rate used was $r=0.05$ and time to maturity $T=1$ yr. Pricing with Heston Characteristic Function Method gives
@@ -192,15 +196,6 @@ The figure above compares different pricing methods:
 ![Implied Volatility Surface](figures/implied_volatility_surface.png)
 
 The 3D plot shows the Black Scholes implied volatility as a function of strike price and time to maturity treating the call option price from the Heston model as market data. The implied volatility decreases as a function of the strike price. 
-
-
-
-
-
-
-
-
-
 
 
 
