@@ -1,166 +1,222 @@
-# Heston Model Implementation and Analysis
+# The Heston Model: A Comprehensive Implementation and Analysis
 
-This project implements and analyzes the Heston Stochastic Volatility Model, a widely used model in quantitative finance for pricing options and understanding market dynamics.
+## Table of Contents
+1. [Overview](#overview)
+2. [Implementation Structure](#implementation-structure)
+3. [Model Analysis](#model-analysis)
+4. [Technical Details](#technical-details)
+5. [Results and Insights](#results-and-insights)
+6. [Future Directions](#future-directions)
+7. [Dependencies and Setup](#dependencies-and-setup)
+8. [References](#references)
 
-## Project Structure
+## Overview
+
+The Heston model is a popular stochastic volatility model used in mathematical finance to describe the evolution of asset prices. It was introduced by Steven Heston in 1993 to improve upon the Black-Scholes model by allowing volatility to be stochastic rather than constant.
+
+Under the risk-neutral measure, the Heston model describes the asset price $S_t$ and its variance $v_t$ as:
+
+$$
+\begin{aligned}
+d S_t & =r S_t d t+\sqrt{v_t} S_t d W_t^{(1)} \\
+d v_t & =\kappa\left(\theta-v_t\right) d t+\sigma \sqrt{v_t} d W_t^{(2)}
+\end{aligned}
+$$
+
+with:
+- $S_t$ : asset price
+- $v_t$ : instantaneous variance
+- $r$ : risk-free rate
+- $\kappa$ : rate of mean reversion
+- $\theta$ : long-term mean variance
+- $\sigma$ : volatility of volatility
+- $W_t^{(1)}, W_t^{(2)}$ : two correlated Brownian motions with correlation $\rho$
+
+This model captures some of the emperically ovserved features in return series: 
+
+- fat-tailed returns
+- volatility clustering 
+- mean reversion (variance tends to revert to a long-term level $\theta$)
+- leverage effect that is captured via negative correlation $\rho<0$ between price and volatility.
+- Implied Volatility Smile/Skew 
+
+In our implementation here we explore some of these feature of the model and also price European Call/Put options using the characteristic function as well Monte Carlo.
+
+## Repo Structure
 
 ```
 HestonModel/
 ├── src/
-│   ├── heston_model.py      # Core Heston model implementation
+│   ├── heston_model.py      # Core model implementation
 │   ├── heston_pricing.py    # Option pricing methods
-│   └── main.py             # Analysis and visualization
-├── figures/                # Generated plots and analysis
-└── README.md              # This file
+│   └── main.py             # Analysis scripts
+├── figures/                # Generated visualizations
+│   ├── price_and_vol_paths.png
+│   ├── volatility_clustering_*.png
+│   ├── mean_reversion.png
+│   ├── sensitivity_*.png
+│   └── implied_volatility_surface.png
+└── requirements.txt       # Project dependencies
 ```
 
-## Features
+## Model Analysis
 
-1. **Heston Model Implementation**
-   - Stochastic volatility dynamics
-   - Mean reversion characteristics
-   - Correlation between asset returns and volatility
-   - Feller condition verification
+### Base Parameters and Conditions
+We set the model parameter to be as follows:
+- Mean reversion speed ($\kappa$): 1.20
+- Long-term variance ($\theta$): 0.10 (31.6% volatility)
+- Volatility of variance ($\sigma$): 0.30
+- Correlation ($\rho$): -0.80
+- Initial variance ($v_0$): 0.10
+- Drift rate ($\mu$): 0.1
 
-2. **Option Pricing Methods**
-   - Characteristic function method
-   - Monte Carlo simulation
-   - Black-Scholes comparison
-   - Implied volatility surface
+These parameters satisfy the Feller condition ($2\kappa\theta \geq \sigma^2$) that ensures the variance process remains strictly positive throughout in the simulations for which we use full truncation scheme. (However we make a note that Feller condition is hardly satisfied when calibrating the model). 
 
-3. **Analysis Tools**
-   - Volatility clustering analysis
-   - Mean reversion studies
-   - Parameter sensitivity analysis
-   - Autocorrelation function analysis
+## 2. Price and Volatility Paths Analysis
 
-## Key Findings
+### Simulation Parameters
+- Number of paths: 1000
+- Time steps: 1250
+- Time horizon: 5.0 years
 
-### Model Parameters
-- Mean reversion speed (κ): 1.20
-- Long-term variance (θ): 0.10 (31.6% volatility)
-- Volatility of variance (σ): 0.30
-- Correlation (ρ): -0.80
-- Initial variance (v₀): 0.10
+### Price and Volatility Paths
 
-### Feller Condition Analysis
-- 2κθ = 0.240
-- σ² = 0.090
-- Condition satisfied with margin: 0.150
+![Price and Volatility Paths](figures/price_and_vol_paths.png)
 
-### Volatility Characteristics
-1. **Volatility Clustering**
-   - Strong persistence in volatility
-   - Positive autocorrelation in absolute returns
-   - Decay pattern following exponential form
+The figure shows multiple sample paths of Price (top panel) and Volatility (bottom panel). Notice that the variance process is strictly positive. This due to the Feller condition + full truncation scheme that sets negative values of the variance to zero. Even though we are imposing Feller condition negative values can still arises due to descretization error. 
 
-2. **Mean Reversion**
-   - Variance reverts to long-term level θ
-   - Speed of mean reversion varies with initial conditions
-   - Estimated mean reversion speed matches theoretical κ
+## 3. Volatility Clustering Analysis
 
-3. **Leverage Effect**
-   - Strong negative correlation (-0.8) between returns and volatility
-   - Captures market asymmetry
-   - Explains volatility skew in option prices
+Volatility clustering is quantitatively measured through the auto correlation function (ACF) of the absolute returns or squared return. The existence of clustering is seen as strong positive ACF for small values of lag which decays eventually. In the following plot we pick a sample path and plot its ACF.
 
-### Option Pricing Analysis
-1. **Pricing Methods Comparison**
-   - Characteristic function method provides benchmark prices
-   - Monte Carlo convergence with increasing paths
-   - Black-Scholes comparison using implied volatility
+### Single Path ACF Analysis
 
-2. **Implied Volatility Surface**
-   - Smile/skew patterns
-   - Term structure effects
-   - Strike price dependency
+![Volatility Clustering ACF](figures/volatility_clustering_single_instance_acf.png)
 
-## Running the Analysis
+The figure above shows the ACF analysis of returns for a single path. The top panel displays the ACF of absolute returns, while the bottom panel shows the ACF of squared returns. The orange shaded region represents 95% confidence interval. We see strong autocorrelation in both the plots. 
 
-To run the complete analysis:
+We can also compute the statistical average of the ACF (for fixed value of the lag) over all the paths. The result is shown in the plots below.
 
-```bash
-python src/main.py
+### Path-Averaged ACF Analysis
+
+![Volatility Clustering ACF Averaged](figures/volatility_clustering_acf.png)
+
+The figure above shows the ACF analysis averaged across all simulated paths this again depicts volatility clustering.
+
+
+In the following plots we analyse the decay of the ACF of absolute and squared returns w.r.t. the lag and find that the exponential function $\sim e^{-0.01 \ell}$ fits it well. 
+
+
+### Volatility Decay Analysis
+
+![Volatility Decay ACF](figures/volatility_decay_acf.png)
+![Volatility Decay Log ACF](figures/volatility_decay_log_acf.png)
+
+The exponential fall-off of these auto correlations observed in the Heston model is too fast compared to real financial time series where the decay is observed to be power law in the lag $\sim \ell^{-\alpha}$ indicating long memory. This is one of the limitations of the Heston model which is addressed by the rough volatility models. We discuss this point further in the `RFSV model` module. 
+
+## 4. Mean Reversion Analysis
+
+### Mean Reversion Visualization
+
+![Mean Reversion Analysis](figures/mean_reversion.png)
+
+The figure above illustrates the mean reversion behavior of the variance process. Three different initial variance levels are shown (0.01, 0.04, 0.09) and we see that each of them converge to the long-term variance level of 0.1. The shaded regions represent 95% confidence intervals
+
+Numerical Results:
+- Theoretical κ: 1.20
+- Estimated κ: 1.18
+- Estimation error: 1.67%
+
+## 5. Sensitivity on model parameters
+
+### Sensitivity Plots
+
+![Mean Reversion Speed Sensitivity](figures/sensitivity_kappa.png)
+![Long-term Variance Sensitivity](figures/sensitivity_theta.png)
+![Volatility of Variance Sensitivity](figures/sensitivity_sigma.png)
+
+The three figures above show the sensitivity of the model to changes in key following parameters:
+
+1. **Mean Reversion Speed (κ)**: We observe faster convergence with higher $\kappa$ values
+   
+2. **Long-term Variance (θ)**: Different convergence levels for each $\theta$
+
+3. **Volatility of Variance (σ)**: More volatile paths with higher $\sigma$
+
+
+## 6. Option Pricing Analysis
+
+Here we price a European Call/Put option under the Heston model via two independent procedures:
+
+1. Characteristic function method
+2. Monte Carlo simulation 
+
+The characteristic function of the Heston model is given by
+
+$$
+\phi(u, t)=\exp \left[i u \mu t+\frac{\kappa \theta}{\sigma^2}\left((\xi-d) t-2 \ln \left(\frac{1-g_2 e^{-d t}}{1-g_2}\right)\right)+\frac{v_0}{\sigma^2}(\xi-d) \frac{1-e^{-d t}}{1-g_2 e^{-d t}}\right]
+$$
+where
+$$
+\xi=\kappa-\sigma \rho u i, \quad d=\sqrt{\xi^2+\sigma^2\left(u^2+i u\right)}, \quad g_2=\frac{\xi-d}{\xi+d}
+$$
+
+In terms of the characteristic function, the price of the European Call option is given by
+$$
+\boxed{C = S_0 Q_1 - e^{-rt} K Q_2}
+$$
+where $P_1$ and $P_2$ are given by
+$$
+Q_1 = \frac{1}{2}+\frac{1}{\pi}\int_0^\infty du ~\Re\left(\frac{e^{-i u \log \left(\frac{S_0}{K}\right)}}{iu}\frac{\phi (u-i)}{\phi (-i)}\right)~,\\[5pt]
+
+Q_2 = \frac{1}{2}+\frac{1}{\pi}\int_0^\infty du ~\Re\left(\frac{e^{-i u \log \left(\frac{S_0}{K}\right)}}{iu}\phi (u)\right)~.
+$$
+
+The price of the put option can be obtained from the put-call parity given by $P = C - S_0 + K  \exp(-r  T)$. 
+
+In the monte carlo simulation we use the descretization procedure with the full truncation scheme that sets any negative value of the variance process to zero. In this case we simply read-off the end price of the $S_t$ process then setting
+$$
+C = e^{-rt}\mathrm{E}[\left[(S_0-K)^+ \right]]~
+$$
+The expected value is computed by an average over all the paths. 
+
+In the following plot we compare the answer from the two methods for the given model and simulation parameters. The risk free rate used was $r=0.05$ and time to maturity $T=1$ yr. Pricing with Heston Characteristic Function Method gives
+
+```
+Call Price: 36.7347
+Put Price: 14.6148 
 ```
 
-This will generate:
-1. Price and volatility paths
-2. Volatility clustering analysis
-3. Mean reversion studies
-4. Parameter sensitivity analysis
-5. Option pricing comparisons
-6. Implied volatility surface
 
-## Generated Figures
+### Pricing Methods Comparison
 
-The analysis produces several key visualizations in the `figures/` directory:
+![Pricing Methods Comparison](figures/pricing_methods_comparison.png)
 
-1. `price_and_vol_paths.png`
-   - Sample price paths
-   - Corresponding volatility paths
-   - Mean reversion visualization
+The figure above compares different pricing methods:
+- Blue line with error bars: Monte Carlo prices
+- Red dashed line: Result from the characteristic function method
+- We see clear convergence (w.r.t. the number of simulation paths) of the Monte Carlo price to characteristic function price
 
-2. `volatility_clustering_single_instance_acf.png`
-   - Autocorrelation of absolute returns
-   - Autocorrelation of squared returns
-   - Confidence intervals
+### Implied Volatility Surface
 
-3. `mean_reversion.png`
-   - Variance paths from different initial levels
-   - Convergence to long-term variance
-   - Confidence bands
+![Implied Volatility Surface](figures/implied_volatility_surface.png)
 
-4. `sensitivity_*.png`
-   - Parameter sensitivity analysis
-   - Impact of κ, θ, and σ changes
-   - Mean volatility paths
+The 3D plot shows the Black Scholes implied volatility as a function of strike price and time to maturity treating the call option price from the Heston model as market data. The implied volatility decreases as a function of the strike price. 
 
-5. `pricing_methods_comparison.png`
-   - Monte Carlo vs Characteristic function prices
-   - Convergence analysis
-   - Error bounds
 
-6. `implied_volatility_surface.png`
-   - 3D surface of implied volatilities
-   - Strike price dependency
-   - Time to maturity effects
 
-## Key Insights
 
-1. **Volatility Dynamics**
-   - The model successfully captures volatility clustering
-   - Mean reversion is evident in variance paths
-   - Strong leverage effect is maintained
 
-2. **Pricing Accuracy**
-   - Characteristic function method provides stable prices
-   - Monte Carlo converges with sufficient paths
-   - Implied volatility surface shows realistic patterns
 
-3. **Model Stability**
-   - Feller condition is satisfied
-   - No negative variances in simulation
-   - Parameter sensitivity is well-behaved
 
-## Future Enhancements
 
-1. **Model Extensions**
-   - Jump diffusion component
-   - Time-dependent parameters
-   - Multi-factor volatility
 
-2. **Analysis Tools**
-   - Calibration to market data
-   - Risk metrics calculation
-   - Greeks computation
 
-3. **Performance Optimization**
-   - Parallel Monte Carlo simulation
-   - GPU acceleration
-   - Variance reduction techniques
 
-## Dependencies
 
+## Dependencies and Setup
+
+### Requirements
 - Python 3.8+
 - NumPy
 - SciPy
@@ -168,8 +224,26 @@ The analysis produces several key visualizations in the `figures/` directory:
 - Seaborn
 - statsmodels
 
+### Installation
+```bash
+pip install -r requirements.txt
+```
+
+### Running Analysis
+```bash
+python src/main.py  # Generates all analyses and figures
+```
+
+## To do ...
+
+1. Return distribution / ACF of the volatility itself (instead of price returns)
+
+2. Demonstrate leverage effect
+
+3. Improved Monte-carlo simulation for the variance process via the quadratic exponential discretization scheme of Leif Andersen (2006)
+
 ## References
 
 1. Heston, S. L. (1993). "A Closed-Form Solution for Options with Stochastic Volatility with Applications to Bond and Currency Options"
 2. Gatheral, J. (2006). "The Volatility Surface: A Practitioner's Guide"
-3. Cont, R. (2001). "Empirical Properties of Asset Returns: Stylized Facts and Statistical Issues" 
+3. Cont, R. (2001). "Empirical Properties of Asset Returns: Stylized Facts and Statistical Issues"
