@@ -1,14 +1,4 @@
-# The Heston Model: A Comprehensive Implementation and Analysis
-
-## Table of Contents
-1. [Overview](#overview)
-2. [Implementation Structure](#implementation-structure)
-3. [Model Analysis](#model-analysis)
-4. [Technical Details](#technical-details)
-5. [Results and Insights](#results-and-insights)
-6. [Future Directions](#future-directions)
-7. [Dependencies and Setup](#dependencies-and-setup)
-8. [References](#references)
+# Implementation and analysis of the Heston model
 
 ## Overview
 
