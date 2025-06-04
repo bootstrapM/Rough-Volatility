@@ -1,38 +1,9 @@
 # Volatility analysis with the GARCH(1, 1) model
 
-This project demonstrates and compares volatility clustering in both simulated and real market data using GARCH(1, 1) (Generalized Autoregressive Conditional Heteroskedasticity) model. The analysis includes simulated GARCH processes, volatility shock impacts, and real S&P 500 market behavior.
-
-## Project structure and codebase
-
-- `simulate_data.py`: Generate synthetic financial data with volatility clustering and shocks
-- `garch_analysis.py`: Implementation of GARCH model analysis
-- `visualization.py`: Functions for visualizing results and analyzing shock impacts
-- `main.py`: Main script to run the complete analysis
-- `notebooks/`: Jupyter notebook following along the main.py script
-
 ## Overview
 
-1. Simulated Data Analysis
-   - GARCH(1,1) process simulation
-   - Homoskedastic (constant volatility) process
-   - Comparison of volatility patterns
-
-2. Volatility Shock Analysis
-   - Simulate and analyze large shocks
-   - Study shock propagation and persistence
-   - Compare pre- and post-shock GARCH parameters
-
-3. Real Market Analysis
-   - S&P 500 daily returns analysis
-   - Comparison with simulated data
-   - Real market volatility clustering patterns
-
-4. Visualizations
-   - Returns and volatility plots
-   - Volatility clustering evidence via the Auto correlation function
-   - Returns distribution
-   - Shock impact visualization
-   - Real vs. simulated data comparison
+We analyze volatility clustering in financial markets using GARCH (Generalized Autoregressive Conditional Heteroskedasticity) models. We specifically focus on the GARCH(1,1) model as it conveys the gist of the
+large set of models in this family. Our analysis encompasses both simulated and real market data, with focus on volatility shock impacts and market behavior comparison.
 
 ## Setup
 
@@ -57,103 +28,292 @@ pip install -r requirements.txt
 - yfinance: Market data fetching
 - statsmodels: Statistical analysis
 
-## Running the Analysis
+### Running the Analysis
 
-1. Run the main script:
+Run the main script:
 ```bash
 python main.py
 ```
 
-2. Or explore the Jupyter notebook in the `notebooks/` directory.
+## GARCH(1,1) model
 
-## Methodology
+The GARCH(1,1) model is the most popular and studied model in the family of Conditional Heteroscedastic Models first proposed in the 1980s by Engle and Bollerslev.
 
-### GARCH model implementation
+Under this model the returns given by
 
-The GARCH(1,1) process for the volatility squared time series is defined as follows:
+$$
+r_t = \sigma_t \epsilon_t~,\qquad \epsilon_t \sim \mathcal{N}(0,1)
+$$
 
-σ²ₜ = ω + α₁ε²ₜ₋₁ + β₁σ²ₜ₋₁
+where $\sigma_t^2$ is the conditional variance which is given by:
 
-Where:
-- σ²ₜ is the conditional variance at time t
-- ω is the constant term (omega)
-- α₁ is the ARCH parameter (impact of past returns)
-- β₁ is the GARCH parameter (persistence of volatility)
-- ε²ₜ₋₁ is the squared return from the previous period
+$$
+\sigma_t^2 = \omega + \alpha_1 r_{t-1}^2 + \beta_1 \sigma_{t-1}^2~.
+$$
 
-Key Parameters Used:
-- ω = 0.05 (constant term)
-- α = 0.15 (ARCH effect)
-- β = 0.80 (GARCH effect)
-- Total Persistence = 0.95
+In this equation we have
+- $\sigma_t^2$ is the conditional variance at time $t$
+- $\omega$ is a constant 
+- $\alpha_1$ is the ARCH parameter (impact of past returns)
+- $\beta_1$ is the GARCH parameter (persistence of volatility)
+- $r_{t-1}^2$ is the squared return from the previous period
 
-### Shock Analysis Configuration
-
-The shock analysis introduces controlled volatility spikes with:
-- Shock Magnitude: 8x normal volatility
-- Shock Timing: Mid-sample period
-- Analysis Window: Pre/post-shock comparison
+For simulation purpose, we set the initial variance $\sigma_0^2$ to its long term average value
+$$
+\sigma_0^2 = \frac{\omega}{1-\alpha_1-\beta_1}~,
+$$
+which fixes $r_0$. This seeds the recursion that then generates the rest of the time series. 
 
 
-## Main analysis components
+## Analysis with simulation data I : GARCH (1,1) model
 
-1. Simulated GARCH Process
-   - Generate synthetic returns with volatility clustering
-   - Control parameters for volatility persistence
-   - Compare with homoskedastic process
+With the aforementioned initial condition we simulate a return series based on GARCH(1,1) model with the following model parameters
+```
+'omega': 0.05,   # Small constant term
+'alpha': 0.15,   # Impact of past squared returns
+'beta' : 0.80    # High persistence in volatility
+```
 
-2. Volatility Shock Analysis
-   - Introduce significant market shocks
-   - Analyze shock decay
-   - Study changes in volatility dynamics
-   - Compare pre- and post-shock behavior
+Here is the plot of the resulting simulated data:
 
-3. GARCH Model Analysis
-   - Fit GARCH(1,1) model to both simulated and real data
-   - Estimate and compare parameters
-   - Analyze volatility persistence
-   - Study model performance on different data types
+![GARCH Process Returns and Volatility](plots/garch_process_without_shock_returns_volatility.png)
+*Returns and Volatility for simulated GARCH(1,1) process with the above mentioned model parameters (no shock / no volatility bursts)*
 
-4. Real Market Integration
-   - Fetch and analyze S&P 500 data
-   - Compare market behavior with simulations
-   - Validate GARCH model assumptions
-   - Study real volatility clustering patterns
+In the simulated data we know the true volatility process that is shown in green above. In this controlled setting we then try to *fit* a GARCH(1,1) model with the data and compare the volatility process of the fitted model (in red) with the true process (in green). This is shown in the last plot above. The estimated model parameters are
+```
+Estimated GARCH parameters:
+omega: 0.0412
+alpha: 0.0900
+beta: 0.8584
+persistence: 0.9484
+log_likelihood: -1264.2782
+aic: 2534.5565
+bic: 2549.2797
+```
 
-5. Visualization & Diagnostics
-   - Time series plots of returns and volatility
-   - Autocorrelation analysis for clustering
-   - Returns distribution vs. normal
-   - Shock impact visualization
-   - Comparative analysis plots
+```
+Volatility Estimation Statistics:
+Mean Absolute Error: 0.102950
+Root Mean Square Error: 0.122959
+Correlation between True and Estimated: 0.980134
+```
 
-## Summary of key findings
 
-1. **Volatility Clustering**
-   - Strong evidence in S&P 500 data as seen from ACF
-   - Evidence also in simulated data
-   - Clustering intensifies post-shock
+The return series has the following descriptive statistics
+```
+Return series statistics:
+mean: 0.0072
+std: 0.8811
+skewness: 0.0440
+kurtosis: 0.3594
+min: -3.3109
+max: 3.1140
+```
 
-2. **Model Accuracy**
-   - High correlation with true volatility (0.98)
-   - Low estimation error (MAE: 0.103)
-   - Robust performance across different market conditions
+Following is the plot of the return distribution and QQ plot.
+![GARCH Returns Distribution](plots/garch_process_without_shock_returns_distribution.png)
+*Returns Distribution for the simulated GARCH(1,1) process without shocks or volatility bursts*
 
-3. **Shock Impact**
-   - Significant increase in mean volatility
-   - Persistence increases post-shock
-   - Quick initial response followed by gradual decay
+![GARCH QQ plot](plots/garch_process_without_shock_qq_plot.png)
+*QQ plot for the returns in the simulated GARCH(1,1) process without shocks or volatility bursts*
 
-4. **Real vs. Simulated Data**
-   - Similar persistence patterns
-   - Higher kurtosis in real data (6.94 vs 2.53)
+We now analyze volatility clustering in this time series. This is done by the looking at the autocorrelation function of the absolute or squared returns. Following is the plot for the ACF of the squared returns. 
 
+![GARCH Clustering](plots/garch_process_without_shock_volatility_clustering.png)
+*Volatility Clustering in GARCH process*
+```
+Volatility Clustering Statistics:
+Number of significant lags: 10 out of 20
+First lag autocorrelation: 0.0362
+95% Confidence bound: ±0.0620
+Weak or no evidence of volatility clustering
+```
+We see that there is some evidence of volatility clustering in this return series -- 10 out of the first 20 lag values have statistically significant positive auto-correlation.
+
+We now compare these plots against a *homoskedastic* time-series data where we do not expect any volatility clustering.
+
+### Comparision with homoskedastic data where there is no volatility clustering
+
+Following plot is generated by a normal distribution with $\sigma=0.02$
+
+![Homoskedastic Process](plots/homoskedastic_process_no_volatility_clustering_returns_volatility.png)
+*Returns and Volatility for Homoskedastic Process*
+
+![Homoskedastic Returns Distribution](plots/homoskedastic_process_no_volatility_clustering_returns_distribution.png)
+*Returns distribution for Homoskedastic Process*
+
+![Homoskedastic QQ plot](plots/homoskedastic_process_no_volatility_clustering_qq_plot.png)
+*QQ plot for returns in the Homoskedastic Process*
+
+![Homoskedastic Data no Volatility clustering](plots/homoskedastic_process_no_volatility_clustering_volatility_clustering.png)
+*No signs of volatility clustering in the Homoskedastic Process*
+
+```
+Volatility Clustering Statistics:
+Number of significant lags: 3 out of 20
+First lag autocorrelation: 0.0033
+95% Confidence bound: ±0.0620
+Weak or no evidence of volatility clustering
+```
+
+We see that the first lag autocorrelation here is much smaller than the simulated GARCH(1,1) data shown previously. The lack of statistically significant ACF values => there is no volatility clustering. 
+
+
+## Analysis with simulation data II : GARCH (1,1) model + volatility burst
+
+A volatility burst is a period of temporarily high volatility typically triggered by a large return shock. We'd like to understand how long this elevated volatility lasts and how fast it decays back to normal.
+
+We now look at the simulation of GARCH(1,1) model in the presence of a shock in the volatility series at a specified time with a specified magnitude. The plot of the return series, true volatility series and the fitted GARCH(1,1) model volatility series is shown below. 
+
+![GARCH Process with Shock](plots/garch_process_with_shock_returns_volatility.png)
+*Returns and Volatility for GARCH Process in the presence of a shock in the volatility time series*
+
+The fitted model parameters are 
+```
+Estimated GARCH parameters:
+omega: 0.0294
+alpha: 0.0916
+beta: 0.8792
+persistence: 0.9709
+log_likelihood: -1332.0613
+aic: 2670.1225
+bic: 2684.8458
+```
+
+Let also look the return statistics and distribution under the presence of a shock
+
+```
+Return series statistics:
+mean: 0.0190
+std: 0.9759
+skewness: 0.3590
+kurtosis: 2.5267
+min: -4.5812
+max: 5.4026
+```
+
+Comparing with the previous statistics we see the return are more skewed and have a higher kurtosis in the presence of shock. 
+
+![GARCH Returns Distribution](plots/garch_process_with_shock_returns_distribution.png)
+*Returns Distribution for the simulated GARCH(1,1) process in the presence of a shock in the volatility time series*
+
+![GARCH QQ plot](plots/garch_process_with_shock_qq_plot.png)
+*QQ plot for the returns in the simulated GARCH(1,1) process in the presence of a shock in the volatility time series*
+
+Following is the plot for the ACF of the squared returns. 
+![GARCH Clustering](plots/garch_process_with_shock_volatility_clustering.png)
+*Volatility Clustering in GARCH process in the presence of a shock in the volatility time series*
+
+```
+Volatility Clustering Statistics:
+Number of significant lags: 15 out of 20
+First lag autocorrelation: 0.0610
+95% Confidence bound: ±0.0620
+Weak or no evidence of volatility clustering
+```
+We observe that clustering is more pronounced in the presence of volatility shocks. 
+
+### Analysis of shock impact
+
+![Shock Analysis](plots/_shock_analysis.png)
+*Analysis of Volatility Shock Impact*
+
+
+```
+Shock Impact Analysis:
+Pre-shock statistics:
+Mean volatility: 0.7796
+Max volatility: 1.0889
+
+Post-shock statistics:
+Mean volatility: 1.5699
+Max volatility: 2.3665
+Peak-to-pre-shock ratio: 3.04
+
+Shock half-life: 0 days
+
+Comparing GARCH persistence:
+
+Pre-shock model:
+Alpha: 0.0712
+Beta: 0.8456
+Persistence: 0.9168
+
+Post-shock model:
+Alpha: 0.0946
+Beta: 0.8784
+Persistence: 0.9731
+```
+
+`Persistence` is given by the sum $\alpha+\beta$ which determines how persistent volatility is: a value closer to 1 implies volatility decays slowly so that there are long-lasting burst. If $\alpha+\beta\ll 1$ then volatility decays exponentially.
+
+## Analysis on S&P 500 
+
+We collect 4 years worth of S&P 500 data till date. A look at its return histogram and the QQ plot shows that it deviates from the normal distribution in the tail regions. 
+
+![Distribution of S&P 500 returns](plots/s&p_500_returns_distribution.png)
+<img src="plots/s&p_500_qq_plot.png" alt="QQ plot of S&P 500 returns" width="700"/>
+
+```
+Return series statistics:
+mean: 0.0004
+std: 0.0113
+skewness: 0.2025
+kurtosis: 6.8658
+min: -0.0597
+max: 0.0952
+acf_squared_returns: 0.1584
+```
+
+We fit this returns data to the GARCH(1,1) model and find the following estimates for the model parameters
+
+```
+Estimated GARCH parameters:
+omega: 0.0000
+alpha: 0.1000
+beta: 0.8800
+persistence: 0.9800
+log_likelihood: 3195.7535
+aic: -6385.5070
+bic: -6370.7748
+```
+Below is the plot for the S&P 500 returns series data along with the plot for estimated volatility obtained from the fitted GARCH(1,1) model.
+
+![Returns and Volatility series of S&P 500](plots/s&p_500_returns_volatility.png)
+
+```
+Estimated Volatility Statistics:
+Mean: 0.101031
+Std Dev: 0.017788
+Min: 0.073535
+Max: 0.192818
+Median: 0.096859
+```
+
+Below is the plot for the ACF of squared returns which shows statistically significant positive correlation for small values of the lag. 
+
+![Returns and Volatility series of S&P 500](plots/s&p_500_volatility_clustering.png)
+```
+Volatility Clustering Statistics:
+Number of significant lags: 7 out of 20
+First lag autocorrelation: 0.1584
+95% Confidence bound: ±0.0619
+Strong evidence of volatility clustering (significant first-lag autocorrelation)
+```
+
+The theoretical form of the ACF for squared return in GARCH(1,1) is 
+$$
+\rho_\ell= \begin{cases}\frac{\alpha_1\left(1-\alpha_1 \beta_1-\beta_1^2\right)}{1-2 \alpha_1 \beta_1-\beta_1^2} & \text { if } \ell=1 \\[10pt] \rho_1\left(\alpha_1+\beta_1\right)^{\ell-1} & \text { if } \ell>1\end{cases}
+$$
+
+The ACF of squared returns in GARCH(1,1) model falls off exponentially (note that $\alpha_1+\beta_1<0$ which is required for stationarity of the time series). 
+
+Observe that the value of lag-1 autocorrelation predicted by the model (which turns out to be $\rho_{1, \text{fitted-model}} = 0.2774$ after plugging in the fitted parameters into the above formula) is too high compared to what is observed in the data $\rho_{1, \text{data}} = 0.1584$. This is typical of GARCH models.  
 
 
 ## Things for the future
 
-- EGARCH for asymmetric volatility
-- Alternative volatility models (Heston, Rough Heston, Rough Fractional Volatility)
+- EGARCH for asymmetric volatility 
 
 - Analyse more real world market data 
    - CBOE Volatility Index (VIX), Options data, Historical Stock Prices

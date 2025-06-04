@@ -230,7 +230,7 @@ class VolatilityVisualizer:
         
         fig, ax = plt.subplots(figsize=(10, 10))
         sm.graphics.qqplot(std_residuals, line='45', fit=True, ax=ax)
-        ax.set_title('Q-Q Plot of Standardized Residuals')
+        ax.set_title('Q-Q Plot of Returns')
         plt.tight_layout()
         # Save the plot
         plt.savefig(f'plots/{title_prefix}_qq_plot.png', dpi=300, bbox_inches='tight')

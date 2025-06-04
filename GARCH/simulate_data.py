@@ -53,7 +53,7 @@ def simulate_garch_process(
         # Update conditional variance
         sigma2[t] = omega + alpha * returns[t-1]**2 + beta * sigma2[t-1]
     
-    # Convert to pandas Series with datetime index
+    # We convert to pandas Series with datetime index
     dates = pd.date_range(start='2020-01-01', periods=n_samples, freq='D')
     returns = pd.Series(returns, index=dates, name='returns')
     volatility = pd.Series(np.sqrt(sigma2), index=dates, name='volatility')
