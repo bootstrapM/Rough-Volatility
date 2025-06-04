@@ -302,9 +302,11 @@ Strong evidence of volatility clustering (significant first-lag autocorrelation)
 ```
 
 The theoretical form of the ACF for squared return in GARCH(1,1) is 
+
 $$
 \rho_\ell= \begin{cases}\frac{\alpha_1\left(1-\alpha_1 \beta_1-\beta_1^2\right)}{1-2 \alpha_1 \beta_1-\beta_1^2} & \text { if } \ell=1 \\[10pt] \rho_1\left(\alpha_1+\beta_1\right)^{\ell-1} & \text { if } \ell>1\end{cases}
 $$
+
 
 The ACF of squared returns in GARCH(1,1) model falls off exponentially (note that $\alpha_1+\beta_1<0$ which is required for stationarity of the time series). 
 
