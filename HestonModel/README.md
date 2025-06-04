@@ -157,7 +157,7 @@ $$
 C = S_0 Q_1 - e^{-rt} K Q_2
 $$
 
-where $P_1$ and $P_2$ are given by
+where $Q_1$ and $Q_2$ are given by
 
 $$
 Q_1 = \frac{1}{2}+\frac{1}{\pi}\int_0^\infty du ~\Re\left(\frac{e^{-i u \log \left(\frac{S_0}{K}\right)}}{iu}\frac{\phi (u-i)}{\phi (-i)}\right)~,
