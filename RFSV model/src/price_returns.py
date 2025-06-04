@@ -201,6 +201,7 @@ class PriceReturns:
         plt.title('Q-Q Plot vs Normal')
         
         plt.tight_layout()
+        plt.savefig(f'figures/return_distribution (γ={self.gamma}).png')
         plt.show()
         
     def plot_price_process(self):
@@ -250,9 +251,9 @@ class PriceReturns:
         # Plot 1: Regular correlation vs lag
         plt.subplot(1, 2, 1)
         plt.plot(lags[1:], corr[1:], 'b-', label='Empirical')
-        plt.title('Absolute Return Correlation')
+        plt.title(f'Absolute Return ACF (γ={self.gamma})')
         plt.xlabel('Lag')
-        plt.ylabel('D(t-s)')
+        plt.ylabel('Abs ACF')
         plt.grid(True)
         plt.legend()
         
@@ -260,13 +261,14 @@ class PriceReturns:
         plt.subplot(1, 2, 2)
         nonzero_lags = lags[1:]
         plt.plot(nonzero_lags**(2*self.H_val), corr[1:], 'b.', label='Empirical')
-        plt.title('Correlation vs lag^(2H)')
+        plt.title(f'Abs Return ACF vs lag^(2H) (γ={self.gamma})')
         plt.xlabel('lag^(2H)')
-        plt.ylabel('D(t-s)')
+        plt.ylabel('Abs ACF')
         plt.grid(True)
         plt.legend()
         
         plt.tight_layout()
+        plt.savefig(f'figures/abs_return_correlation_analysis{self.gamma*10}.png')
         plt.show()
 
     def plot_price_variogram(self, q_values=None, max_lag=None):
@@ -283,14 +285,15 @@ class PriceReturns:
         colors = ['b', 'r', 'g']  # Different colors for different q values
         
         # Plot 1: Raw variograms
-        # plt.subplot(1, 3, 1)
-        for i, q in enumerate(variograms.keys()):
-            plt.plot(lags, variograms[q], f'{colors[i]}-', label=f'q={q}')
-        plt.title('Price Variograms')
-        plt.xlabel('Lag')
-        plt.ylabel('Wq(t-s)')
-        plt.grid(True)
-        plt.legend()
+
+        for q in variograms.keys():
+            plt.subplot(1, 3, q-1)
+            plt.plot(lags, variograms[q], f'{colors[q-2]}-')
+            plt.title(f'Price Variograms (q={q}, γ={self.gamma})')
+            plt.xlabel('Lag')
+            plt.ylabel('Variogram')
+            plt.grid(True)
+    
         
         # # Plot 2: Normalized variograms
         # plt.subplot(1, 3, 2)
@@ -324,7 +327,8 @@ class PriceReturns:
         # plt.grid(True)
         # plt.legend()
         
-        # plt.tight_layout()
+        plt.tight_layout()
+        plt.savefig(f'figures/price_variogram_analysis{self.gamma*10}.png')
         plt.show()
         
         # return scaling_exponents
@@ -391,7 +395,7 @@ class PriceReturns:
         conf_level = 1.96 / np.sqrt(self.N)
         plt.axhline(y=conf_level, color='gray', linestyle=':')
         plt.axhline(y=-conf_level, color='gray', linestyle=':')
-        plt.title('Squared Returns Autocorrelation')
+        plt.title(f'Squared Returns Autocorrelation (γ={self.gamma})')
         plt.xlabel('Lag')
         plt.ylabel('ACF')
         plt.grid(True)
@@ -403,11 +407,12 @@ class PriceReturns:
         plt.axhline(y=0, color='b', linestyle='--')
         plt.axhline(y=conf_level, color='gray', linestyle=':')
         plt.axhline(y=-conf_level, color='gray', linestyle=':')
-        plt.title('Absolute Returns Autocorrelation')
+        plt.title(f'Absolute Returns Autocorrelation (γ={self.gamma})')
         plt.xlabel('Lag')
         plt.ylabel('ACF')
         plt.grid(True)
         plt.legend()
         
         plt.tight_layout()
+        plt.savefig(f'figures/autocorrelation_analysis{self.gamma*10}.png')
         plt.show()

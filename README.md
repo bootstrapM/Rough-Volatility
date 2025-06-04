@@ -38,24 +38,24 @@ Rough-Volatility/
 │   ├── simulate_data.py
 │   ├── visualization.py
 │   ├── requirements.txt
-│   └── notebooks/
-│       └── main.ipynb
+│   └── README.md
+│   ├── plots/
 │
 ├── HestonModel/                   # Heston stochastic volatility model
 │   ├── src/
 │   │   ├── heston_model.py
 |   |   ├── heston_pricing.py
 │   ├── figures/
+│   ├── requirements.txt
 │   ├── README.md
-│   └── REPORT.md
 │
 ├── RFSV model/                    # Rough Fractional Stochastic Volatility
 │   ├── src/
 │   │   ├── fractional_random_walk.py
 │   │   ├── gaussian_rv.py
 │   │   └── price_returns.py
-│   ├── analyzing_drawdowns.py
-│   ├── main.ipynb
+│   ├── figures/
+│   ├── requirements.txt
 │   └── README.md
 │
 └── README.md                      # Main project documentation

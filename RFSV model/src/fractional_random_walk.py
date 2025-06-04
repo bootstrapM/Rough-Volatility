@@ -191,6 +191,7 @@ class FractionalRandomWalk:
         plt.ylabel('ζ(q)')
         
         plt.tight_layout()
+        plt.savefig('figures/scaling_exponents_analysis.png')
         plt.show()
         
         return np.array(orders), np.array(scaling_exponents)
@@ -208,6 +209,8 @@ class FractionalRandomWalk:
         plt.xlabel('Time')
         plt.ylabel('Value')
         plt.grid(True)
+        plt.tight_layout()
+        plt.savefig('figures/fractional_random_walk.png')
         plt.show()
         
     def plot_variogram(self, max_lag=None):
@@ -232,6 +235,8 @@ class FractionalRandomWalk:
         plt.ylabel('V(l)')
         plt.legend()
         plt.grid(True)
+        plt.tight_layout()
+        plt.savefig(f'figures/variogram_analysis (γ={self.gamma}).png')
         plt.show()
 
     def plot_correlation_analysis(self, min_lag=0, max_lag=None):
@@ -251,7 +256,7 @@ class FractionalRandomWalk:
         # Plot 1: C(l) vs l=lags
         plt.subplot(1, 2, 1)
         plt.plot(lags, corr, 'b-', label='C(ℓ)')
-        plt.title('Correlation Function')
+        plt.title(f'Correlation Function (γ={self.gamma})')
         plt.xlabel('Lag (ℓ)')
         plt.ylabel('C(ℓ)')
         plt.grid(True)
@@ -275,11 +280,12 @@ class FractionalRandomWalk:
                 'r--', 
                 label=f'Fit: slope = {coeffs[0]:.6f}')
             
-        plt.title('Correlation vs ℓ^(2H)')
+        plt.title(f'Correlation vs ℓ^(2H) (γ={self.gamma})')
         plt.xlabel('ℓ^(2H)')
         plt.ylabel('C(ℓ)')
         plt.grid(True)
         plt.legend()
         
         plt.tight_layout()
+        plt.savefig(f'figures/correlation_analysis (γ={self.gamma}).png')
         plt.show()
