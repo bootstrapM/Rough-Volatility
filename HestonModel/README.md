@@ -115,7 +115,7 @@ The leverage effect is a well-known empirical phenomenon observed in financial m
 More formally, the leverage effect refers to a negative correlation between returns and future volatility. Mathematically, the correlation between past returns and future volatility (or variance) is negative:
 
 $$
-\operatorname{Corr}\left(r_t, \sigma_{t+\tau}^2\right)<0 \text { for } \tau>0
+\text{Corr}\left(r_t, \sigma_{t+\tau}^2\right)<0 \text { for } \tau>0
 $$
 
 ![Correlation between past returns and future volatility](figures/leverage_corr.png)
