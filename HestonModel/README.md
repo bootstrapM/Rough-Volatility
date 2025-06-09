@@ -104,7 +104,31 @@ In the following plots we analyse the decay of the ACF of absolute and squared r
 
 The exponential fall-off of these auto correlations observed in the Heston model is too fast compared to real financial time series where the decay is observed to be power law in the lag $\sim \ell^{-\alpha}$ indicating long memory. This is one of the limitations of the Heston model which is addressed by the rough volatility models. We discuss this point further in the `RFSV model` module. 
 
-## 4. Mean Reversion Analysis
+## 4. Leverage Effect
+
+The leverage effect is a well-known empirical phenomenon observed in financial markets (especially in equity markets). It states that when stock prices drop, volatility tends to increase. Conversely, when stock prices rise, volatility tends to decrease (but the effect is weaker). This is schematically shown in the plot below
+
+![Price and volatility](figures/price_and_vol_processes.png)
+*An increase in the volatility is accompanied by a decrease in the asset price and vice versa*
+
+
+More formally, the leverage effect refers to a negative correlation between returns and future volatility. Mathematically, the correlation between past returns and future volatility (or variance) is negative:
+
+$$
+\operatorname{Corr}\left(r_t, \sigma_{t+\tau}^2\right)<0 \text { for } \tau>0
+$$
+
+![Correlation between past returns and future volatility](figures/leverage_corr.png)
+
+*Exponentially decaying correlation between past returns and future volatility as function of the time lag between the two series. The sign of the correlation is given by the sign of $\rho$*
+
+Below we plot and compare the distribution of final prices for a positive and a negative value of rho. 
+![Distribution of final prices with different rho values](figures/heston_final_prices_rho_comparison.png)
+
+Distribution of final prices with different rho values. We see that there are long tails in the distribution of the final price in the negative (positive) direction for negative (positive) values of the correlation $\rho$.
+
+
+## 5. Mean Reversion Analysis
 
 ### Mean Reversion Visualization
 
@@ -117,7 +141,7 @@ Numerical Results:
 - Estimated κ: 1.18
 - Estimation error: 1.67%
 
-## 5. Sensitivity on model parameters
+## 6. Sensitivity on model parameters
 
 ### Sensitivity Plots
 
@@ -134,7 +158,7 @@ The three figures above show the sensitivity of the model to changes in key foll
 3. **Volatility of Variance (σ)**: More volatile paths with higher $\sigma$
 
 
-## 6. Option Pricing Analysis
+## 7. Option Pricing Analysis
 
 Here we price a European Call/Put option under the Heston model via two independent procedures:
 
@@ -225,9 +249,7 @@ python src/main.py  # Generates all analyses and figures
 
 1. Return distribution / ACF of the volatility itself (instead of price returns)
 
-2. Demonstrate leverage effect
-
-3. Improved Monte-carlo simulation for the variance process via the quadratic exponential discretization scheme of Leif Andersen (2006)
+2. Improved Monte-carlo simulation for the variance process via the quadratic exponential discretization scheme of Leif Andersen (2006)
 
 ## References
 

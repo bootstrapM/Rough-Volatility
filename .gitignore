@@ -1,4 +1,5 @@
 **/.DS_Store
 GARCH/venv/
+HestonModel/src/model_exploration.ipynb
 RFSV\ model/main.ipynb
 RFSV\ model/src/analyzing_drawdowns.py

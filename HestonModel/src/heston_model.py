@@ -417,4 +417,99 @@ class HestonModel:
         print(f"True mean reversion rate: f{self.params.kappa}")
         print(f"Extimated mean reversion rate from the simulated variance paths: f{kappa_est}")
         
-        return kappa_est 
+        return kappa_est
+    
+    def analyze_leverage_effect(self, prices: np.ndarray, variances: np.ndarray, 
+                                max_lag: int = 50) -> None:
+        """
+        Demonstrate the leverage effect by comuting correlation between current returns and future volatility squared.
+        
+        Args:
+            prices: 2D array of prices (M x N+1) where M is number of paths
+            variances: 2D array of variances (M x N+1)
+            max_lag: Maximum number of time steps to look ahead
+        """
+        M, N_plus_1 = prices.shape
+        N = N_plus_1 - 1
+        
+        # Calculate returns (log returns) for all paths
+        returns = np.log(prices[:, 1:] / prices[:, :-1])  # Shape: (M, N)
+        
+        # Calculate volatility squared (variance)
+        vol_squared = variances[:, :-1]  # Shape: (M, N)
+        
+        # Initialize array for correlations at different lags
+        correlations = np.zeros(max_lag)
+        correlation_std = np.zeros(max_lag)
+        
+        # Calculate correlation for each lag
+        for lag in range(max_lag):
+            lag_correlations = np.zeros(M)
+            
+            for m in range(M):
+                # Get current returns and future volatility
+                # current_returns = returns[m, :-lag-1] if lag > 0 else returns[m, :]
+                # future_vol = vol_squared[m, lag-1:] if lag > 0 else vol_squared[m, 1:]
+                current_returns = returns[m, :-(lag+1)]  # Remove last (lag+1) elements
+                future_vol = vol_squared[m, (lag+1):]   # Remove first (lag+1) elements
+                
+                # Calculate correlation for this path
+                if len(current_returns) > 1 and len(future_vol) > 1:
+                    lag_correlations[m] = np.corrcoef(current_returns, future_vol)[0, 1]
+            
+            # Store mean and std of correlations across paths
+            correlations[lag] = np.mean(lag_correlations)
+            correlation_std[lag] = np.std(lag_correlations)
+        
+        # Create time points for x-axis (in terms of time steps)
+        time_points = np.arange(max_lag)
+        
+        # Plot results
+        plt.figure(figsize=(12, 8))
+        
+        # Plot correlation with confidence bands
+        plt.plot(time_points, correlations, 'b-', 
+                label='Mean Correlation', linewidth=2)
+        plt.fill_between(time_points, 
+                        correlations - 2*correlation_std,
+                        correlations + 2*correlation_std,
+                        alpha=0.2,
+                        color='blue',
+                        label='95% Confidence Interval')
+        
+        # Add horizontal line at true correlation (rho)
+        plt.axhline(y=self.params.rho, color='r', linestyle='--',
+                   label=f'True Correlation (ρ = {self.params.rho:.2f})')
+        
+        plt.title('Leverage Effect: Correlation between Returns and Future Volatility', 
+                 fontsize=12, pad=20)
+        plt.xlabel('Time Lag (steps)', fontsize=10)
+        plt.ylabel('Correlation', fontsize=10)
+        plt.legend(fontsize=10)
+        plt.grid(True, alpha=0.3)
+        plt.tight_layout()
+        plt.savefig('../figures/leverage_corr.png', dpi=300, bbox_inches='tight')
+        
+        # Add scatter plot for lag=0 (contemporaneous correlation)
+        plt.figure(figsize=(10, 6))
+        sample_path = 0  # Use first path for visualization
+        plt.scatter(returns[sample_path], vol_squared[sample_path], 
+                   alpha=0.5, label='Returns vs Volatility²')
+        
+        plt.title('Leverage Effect: Returns vs Volatility² (Sample Path)', fontsize=12, pad=20)
+        plt.xlabel('Returns', fontsize=10)
+        plt.ylabel('Volatility²', fontsize=10)
+        plt.legend(fontsize=10)
+        plt.grid(True, alpha=0.3)
+        
+        plt.tight_layout()
+        # plt.savefig('../figures/leverage_lead_lag.png', dpi=300, bbox_inches='tight')
+        plt.show()
+        plt.close()
+        
+        # Print statistics
+        print("\nLeverage Effect Lead-Lag Analysis:")
+        print(f"True correlation parameter (ρ): {self.params.rho:.3f}")
+        print(f"Maximum correlation: {np.min(correlations):.3f} at lag {np.argmin(correlations)}")
+        print(f"Correlation at lag 0: {correlations[0]:.3f}")
+        print(f"Correlation at lag {max_lag-1}: {correlations[-1]:.3f}") 
